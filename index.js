@@ -15,23 +15,17 @@ require('readline').createInterface({
 }).on('line', (line) => {
   switch(line) {
     case 's':
-    case 'start':
-      console.log(startTime);
       if (!logging) { startLogging() };
       break;
     case 'e':
-    case 'end':
       if (logging) { endLogging(startTime) };
       break;
     case 'l':
-    case 'log':
-      // console.log('=====================');
-      // singleLog(moment());
-      console.log(log);
+      console.log('=====================');
+      singleLog(moment());
+      // console.log(log);
       break;
     case 'l w':
-    case 'log w':
-    case 'log week':
       console.log('=====================');
       weekLog();
       break;
@@ -57,14 +51,13 @@ const endLogging = (startTime) => {
   const hours = Math.round(diff / (60 * 60));
   const minutes = Math.round((diff - (hours * 60 * 60)) / 60);
 
-  diff = `${hours}:${minutes}`;
-
   const date = moment().format(LOG_FORMAT);
   const result = {
     startTime: startTime.format('HH:mm'),
     endTime: endTime.format('HH:mm'),
-    diff: diff
-  }
+    hours: hours,
+    minutes: minutes
+  };
   if (log[date]) {
     log[date].push(result);
   } else {
@@ -78,13 +71,27 @@ const singleLog = (date) => {
   console.log(date.format(OUTPUT_FORMAT));
   if (log[date.format(LOG_FORMAT)]) {
     log[date.format(LOG_FORMAT)].forEach((line) => {
-      console.log(line);
+      console.log(`    ${line.startTime} - ${line.endTime}  : ${line.hours}h ${line.minutes}m`);
     });
+    const total = calculateTotal(date.format(LOG_FORMAT));
+    console.log(`total : ${total.hours}h ${total.minutes}m`);
     console.log('=====================');
   } else {
     console.log('ログがありません');
   }
   // TODO: 合計時間
+};
+
+const calculateTotal = (date) => {
+  console.log(log[date]);
+  let totalMinutes = 0
+  log[date].forEach((value) => {
+    totalMinutes += value.hours * 60 + value.minutes;
+  })
+  return {
+    hours: (totalMinutes - totalMinutes % 60) / 60,
+    minutes: totalMinutes % 60
+  };
 };
 
 const weekLog = (date) => {
