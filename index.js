@@ -1,44 +1,47 @@
 'use strict';
 const moment = require('moment');
+const fs = require('fs');
 const LOG_FORMAT = 'YYYY/MM/DD';
 const OUTPUT_FORMAT = 'YYYY / MM / DD';
 
-const today = moment().format(LOG_FORMAT);
+let log = {};
 
-// const log = {};
-const log = {
-  '2017/10/29': [
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1}
-  ],
-  '2017/10/28': [
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1}
-  ],
-  '2017/10/27': [
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
-    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1}
-  ],
+const readFromLogFile = (path) => {
+  fs.readFile(path, 'utf8', (err, data) => {
+    if (err) throw err;
+    log = JSON.parse(data);
+  });
 };
+
+const isExistFile = (path) => {
+  try {
+    fs.statSync(path);
+    return true;
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      return false;
+    }
+  }
+};
+
+if (isExistFile('./log.txt')) {
+  readFromLogFile('./log.txt');
+}
 let logging = false;
 let startTime;
 
-require('readline').createInterface({
+const reader = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
-}).on('line', (line) => {
+});
+
+reader.on('line', (line) => {
   switch(line) {
     case 's':
-      if (!logging) { startLogging() };
+      if (!logging) startLogging();
       break;
     case 'e':
-      if (logging) { endLogging(startTime) };
+      if (logging) endLogging(startTime);
       break;
     case 'l':
       console.log('=====================');
@@ -53,6 +56,16 @@ require('readline').createInterface({
       break;
   };
 });
+
+reader.on('close', () => {
+  updateToLogFile('log.txt', JSON.stringify(log));
+});
+
+const updateToLogFile = (path, data) => {
+  fs.writeFile(path, data, (err) => {
+    if (err) throw err;
+  });
+};
 
 const startLogging = () => {
   logging = true;
