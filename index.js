@@ -5,7 +5,27 @@ const OUTPUT_FORMAT = 'YYYY / MM / DD';
 
 const today = moment().format(LOG_FORMAT);
 
-const log = {};
+// const log = {};
+const log = {
+  '2017/10/29': [
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1}
+  ],
+  '2017/10/28': [
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1}
+  ],
+  '2017/10/27': [
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
+    {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1}
+  ],
+ };
 let logging = false;
 let startTime;
 
@@ -23,9 +43,8 @@ require('readline').createInterface({
     case 'l':
       console.log('=====================');
       singleLog(moment());
-      // console.log(log);
       break;
-    case 'l w':
+    case 'lw':
       console.log('=====================');
       weekLog();
       break;
@@ -67,23 +86,7 @@ const endLogging = (startTime) => {
   console.log('計測を終了しました');
 };
 
-const singleLog = (date) => {
-  console.log(date.format(OUTPUT_FORMAT));
-  if (log[date.format(LOG_FORMAT)]) {
-    log[date.format(LOG_FORMAT)].forEach((line) => {
-      console.log(`    ${line.startTime} - ${line.endTime}  : ${line.hours}h ${line.minutes}m`);
-    });
-    const total = calculateTotal(date.format(LOG_FORMAT));
-    console.log(`total : ${total.hours}h ${total.minutes}m`);
-    console.log('=====================');
-  } else {
-    console.log('ログがありません');
-  }
-  // TODO: 合計時間
-};
-
 const calculateTotal = (date) => {
-  console.log(log[date]);
   let totalMinutes = 0
   log[date].forEach((value) => {
     totalMinutes += value.hours * 60 + value.minutes;
@@ -94,14 +97,46 @@ const calculateTotal = (date) => {
   };
 };
 
-const weekLog = (date) => {
+const calculateAverage = ({hours, minutes}, days) => {
+  const totalMinutes = hours * 60 + minutes;
+  return {
+    hours: Math.round((((totalMinutes - totalMinutes % 60) / 60) / days) * 10) / 10,
+    minutes: Math.round((totalMinutes % 60 / days) * 10) / 10
+  };
+};
+
+const singleLog = (date) => {
+  console.log(date.format(OUTPUT_FORMAT));
+  if (log[date.format(LOG_FORMAT)]) {
+    log[date.format(LOG_FORMAT)].forEach((line) => {
+      console.log(`    ${line.startTime} - ${line.endTime}  : ${line.hours}h ${line.minutes}m`);
+    });
+    const total = calculateTotal(date.format(LOG_FORMAT));
+    console.log(`合計 : ${total.hours}h ${total.minutes}m`);
+    console.log('=====================');
+  } else {
+    console.log('    ログがありません');
+    console.log('=====================');
+  }
+};
+
+const weekLog = () => {
   const week = [];
+  const total = {hours: 0, minutes: 0};
   for(let i = 0; i < 7; i++) {
-    week.push(date.subtract(i, 'days').format(LOG_FORMAT));
+    week.push(moment().subtract(i, 'days'));
   }
   week.forEach((date) => {
+    console.log(date);
     singleLog(date);
+    if (log[date.format(LOG_FORMAT)]) {
+      log[date.format(LOG_FORMAT)].forEach((v) => {
+        total.hours += v.hours;
+        total.minutes += v.minutes;
+      })
+    }
   });
-  // TODO: 合計時間
-  // TODO: 平均時間
+  console.log(`週合計稼働時間 : ${total.hours}h ${total.minutes}m`);
+  const average = calculateAverage(total, 7);
+  console.log(`週平均稼働時間 : ${average.hours}h ${average.minutes}m`);
 }
