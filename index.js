@@ -5,14 +5,7 @@ const OUTPUT_FORMAT = 'YYYY / MM / DD';
 
 const today = moment().format(LOG_FORMAT);
 
-// const log = {};
-const log = {
-  '2017/10/29': [
-    'hoge',
-    'huga',
-    'piyo'
-  ]
-};
+const log = {};
 let logging = false;
 let startTime;
 
@@ -23,16 +16,18 @@ require('readline').createInterface({
   switch(line) {
     case 's':
     case 'start':
-      if (!startTime) { startLogging() };
+      console.log(startTime);
+      if (!logging) { startLogging() };
       break;
     case 'e':
     case 'end':
-      if (startTime) { endLogging() };
+      if (logging) { endLogging(startTime) };
       break;
     case 'l':
     case 'log':
-      console.log('=====================');
-      singleLog(moment());
+      // console.log('=====================');
+      // singleLog(moment());
+      console.log(log);
       break;
     case 'l w':
     case 'log w':
@@ -48,14 +43,35 @@ require('readline').createInterface({
 
 const startLogging = () => {
   logging = true;
-  // TODO: ログ開始処理
+  startTime = moment();
   console.log('計測中です...');
 };
 
-const endLogging = () => {
+const endLogging = (startTime) => {
   logging = false;
-  // TODO: ログ終了＋記録処理
-  console.log('end');
+  const endTime = moment();
+
+  let diff = endTime.diff(startTime);
+  diff = Math.round(diff / 1000);
+
+  const hours = Math.round(diff / (60 * 60));
+  const minutes = Math.round((diff - (hours * 60 * 60)) / 60);
+
+  diff = `${hours}:${minutes}`;
+
+  const date = moment().format(LOG_FORMAT);
+  const result = {
+    startTime: startTime.format('HH:mm'),
+    endTime: endTime.format('HH:mm'),
+    diff: diff
+  }
+  if (log[date]) {
+    log[date].push(result);
+  } else {
+    log[date] = [result];
+  }
+  
+  console.log('計測を終了しました');
 };
 
 const singleLog = (date) => {
