@@ -25,7 +25,7 @@ const log = {
     {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1},
     {startTime: 'hoge', endTime: 'hoge', hours: 1, minutes: 1}
   ],
- };
+};
 let logging = false;
 let startTime;
 
