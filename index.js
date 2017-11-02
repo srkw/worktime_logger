@@ -80,8 +80,14 @@ const endLogging = (startTime) => {
   let diff = endTime.diff(startTime);
   diff = Math.round(diff / 1000);
 
-  const hours = Math.round(diff / (60 * 60));
-  const minutes = Math.round((diff - (hours * 60 * 60)) / 60);
+  let hours, minutes;
+  if (diff < 60) {
+    hours = 0;
+    minutes = Math.round(diff / 60);
+  } else {
+    hours = Math.round(diff / (60 * 60));
+    minutes = Math.round((diff - (hours * 60 * 60)) / 60);
+  }
 
   const date = moment().format(LOG_FORMAT);
   const result = {
