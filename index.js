@@ -70,6 +70,7 @@ const updateToLogFile = (path, data) => {
 const startLogging = () => {
   logging = true;
   startTime = moment();
+  console.log(startTime.format('YYYY年MM月DD日 HH時mm分'));
   console.log('計測中です...');
 };
 
